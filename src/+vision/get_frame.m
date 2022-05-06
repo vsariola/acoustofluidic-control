@@ -1,5 +1,4 @@
 function imageData = get_frame()
     global vid;
-                     
-    imageData = getsnapshot(vid);
 
+    imageData = getsnapshot(vid);
