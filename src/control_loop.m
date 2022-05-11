@@ -9,7 +9,7 @@ function control_loop(varargin)
 
     expected_model = {'lut'};
     expected_chip = {'real', 'simulated'};
-    expected_controller = {'linprog', 'bandit'};
+    expected_controller = {'linprog', 'bandit', 'sfb'};
     expected_task = {'pathfollow'};
 
     parser = inputParser;
@@ -81,6 +81,8 @@ function control_loop(varargin)
                 step = @linprog_step;
             case 'bandit'
                 step = bandit_ctrl(@bandit_reward, chip.numfreq, varargin{:});
+            case 'sfb'
+                step = sfb_ctrl(@sfb_action, task, chip.numfreq, varargin{:});
             otherwise
                 error('Unknown controller name');
         end
@@ -140,6 +142,12 @@ function control_loop(varargin)
         end
         n = my_linprog_ctrl(pos, dir);
         chip.output(n);
+        task.update_pos(chip.get_pos());
+        task.update_progress();
+    end
+
+    function sfb_action(a)
+        chip.output(a);
         task.update_pos(chip.get_pos());
         task.update_progress();
     end
