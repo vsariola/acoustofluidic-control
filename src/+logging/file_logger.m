@@ -26,6 +26,7 @@ function ret = file_logger(varargin)
     end
 
     if parser.Results.randstring
+        rng('shuffle');
         symbols = ['a':'z' 'A':'Z'];
         randstring = symbols(randi(numel(symbols), [1 8]));
         filename = [filename '-' randstring];
