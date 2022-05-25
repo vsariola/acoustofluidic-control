@@ -77,7 +77,8 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
                 [wx, wy] = ndgrid((1:param.max_eigens) * pi / param.chipwidth, (1:param.max_eigens) * pi / param.chipheight);
                 for k = 1:param.num_bandits
                     pest = zeros(size(pt));
-                    for n = 1:2:numel(p)
+                    for i = 1:size(p,1)
+                        n = i*2-1;
                         mdx = wx .* (-squeeze(coeff(:, :, 1, k)) .* sin(pt(n) .* wx) .* cos(pt(n + 1) .* wy) ...
                             +squeeze(coeff(:, :, 2, k)) .* cos(pt(n) .* wx) .* cos(pt(n + 1) .* wy) ...
                             -squeeze(coeff(:, :, 3, k)) .* sin(pt(n) .* wx) .* sin(pt(n + 1) .* wy) ...
@@ -88,7 +89,7 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
                             +squeeze(coeff(:, :, 3, k)) .* cos(pt(n) .* wx) .* cos(pt(n + 1) .* wy) ...
                             +squeeze(coeff(:, :, 4, k)) .* sin(pt(n) .* wx) .* cos(pt(n + 1) .* wy));
                         dy = sum(sum(mdy));
-                        pest(n:n + 1) = pt(n:n + 1) + [dx, dy];
+                        pest(:,i) = pt(:,i) + [dx;dy];
                     end
                     costs(k) = task.get_cost(pest');
                 end
