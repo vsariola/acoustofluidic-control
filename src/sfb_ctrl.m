@@ -68,6 +68,7 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
     function step()
         a = find(cellfun(@length, p_hist) < 2, 1);
         p = task.get_pos();
+        pt = p';
         if isempty(a)
             if rand() < param.epsilon
                 a = randi([1, num_bandits], 1);
@@ -75,21 +76,21 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
                 costs = zeros(1, param.num_bandits);
                 [wx, wy] = ndgrid((1:param.max_eigens) * pi / param.chipwidth, (1:param.max_eigens) * pi / param.chipheight);
                 for k = 1:param.num_bandits
-                    pest = zeros(size(p));
-                    for n = 1:2:length(p)
-                        mdx = wx .* (-squeeze(coeff(:, :, 1, k)) .* sin(p(n) .* wx) .* cos(p(n + 1) .* wy) ...
-                            +squeeze(coeff(:, :, 2, k)) .* cos(p(n) .* wx) .* cos(p(n + 1) .* wy) ...
-                            -squeeze(coeff(:, :, 3, k)) .* sin(p(n) .* wx) .* sin(p(n + 1) .* wy) ...
-                            +squeeze(coeff(:, :, 4, k)) .* cos(p(n) .* wx) .* sin(p(n + 1) .* wy));
+                    pest = zeros(size(pt));
+                    for n = 1:2:numel(p)
+                        mdx = wx .* (-squeeze(coeff(:, :, 1, k)) .* sin(pt(n) .* wx) .* cos(pt(n + 1) .* wy) ...
+                            +squeeze(coeff(:, :, 2, k)) .* cos(pt(n) .* wx) .* cos(pt(n + 1) .* wy) ...
+                            -squeeze(coeff(:, :, 3, k)) .* sin(pt(n) .* wx) .* sin(pt(n + 1) .* wy) ...
+                            +squeeze(coeff(:, :, 4, k)) .* cos(pt(n) .* wx) .* sin(pt(n + 1) .* wy));
                         dx = sum(sum(mdx));
-                        mdy = wy .* (-squeeze(coeff(:, :, 1, k)) .* cos(p(n) .* wx) .* sin(p(n + 1) .* wy) ...
-                            -squeeze(coeff(:, :, 2, k)) .* sin(p(n) .* wx) .* sin(p(n + 1) .* wy) ...
-                            +squeeze(coeff(:, :, 3, k)) .* cos(p(n) .* wx) .* cos(p(n + 1) .* wy) ...
-                            +squeeze(coeff(:, :, 4, k)) .* sin(p(n) .* wx) .* cos(p(n + 1) .* wy));
+                        mdy = wy .* (-squeeze(coeff(:, :, 1, k)) .* cos(pt(n) .* wx) .* sin(pt(n + 1) .* wy) ...
+                            -squeeze(coeff(:, :, 2, k)) .* sin(pt(n) .* wx) .* sin(pt(n + 1) .* wy) ...
+                            +squeeze(coeff(:, :, 3, k)) .* cos(pt(n) .* wx) .* cos(pt(n + 1) .* wy) ...
+                            +squeeze(coeff(:, :, 4, k)) .* sin(pt(n) .* wx) .* cos(pt(n + 1) .* wy));
                         dy = sum(sum(mdy));
-                        pest(n:n + 1) = p(n:n + 1) + [dx, dy];
+                        pest(n:n + 1) = pt(n:n + 1) + [dx, dy];
                     end
-                    costs(k) = task.get_cost(pest);
+                    costs(k) = task.get_cost(pest');
                 end
                 [~, a] = min(costs);
             end
@@ -97,12 +98,12 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
 
         logging.log('sfb_pos', p);
         logging.log('sfb_actions', a);
-        p_hist{a} = [p_hist{a}; p'];
+        p_hist{a} = [p_hist{a}; reshape(pt, [], 1)];
         param.action(a);
         dp = task.get_pos() - p;
         logging.log('sfb_deltapos', dp);
-        dp_hist{a} = [dp_hist{a}; dp'];
-        weights{a} = [weights{a} * param.sparse_decay; ones(size(dp'))];
+        dp_hist{a} = [dp_hist{a}; reshape(dp', [], 1)];
+        weights{a} = [weights{a} * param.sparse_decay; reshape(ones(size(dp')), [], 1)];
         l = length(dp_hist{a});
         if l >= 2
             if l > param.sparse_history
