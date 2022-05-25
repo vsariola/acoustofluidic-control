@@ -32,6 +32,9 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
     parse(parser, action, task, num_bandits, varargin{:});
     param = parser.Results;
     logging.message('%s\n%s', mfilename, third_party.struct2str(parser.Results));
+    % quick fix: sparse history has x;y;x;y... so we should always have
+    % even length of sparse history or things go south badly
+    param.sparse_history = round((param.sparse_history)/2)*2;
 
     if param.draw_sfb
         figure;
