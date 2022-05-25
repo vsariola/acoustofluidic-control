@@ -34,7 +34,7 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
     logging.message('%s\n%s', mfilename, third_party.struct2str(parser.Results));
     % quick fix: sparse history has x;y;x;y... so we should always have
     % even length of sparse history or things go south badly
-    param.sparse_history = round((param.sparse_history)/2)*2;
+    param.sparse_history = round((param.sparse_history) / 2) * 2;
 
     if param.draw_sfb
         figure;
@@ -80,8 +80,8 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
                 [wx, wy] = ndgrid((1:param.max_eigens) * pi / param.chipwidth, (1:param.max_eigens) * pi / param.chipheight);
                 for k = 1:param.num_bandits
                     pest = zeros(size(pt));
-                    for i = 1:size(p,1)
-                        n = i*2-1;
+                    for i = 1:size(p, 1)
+                        n = i * 2 - 1;
                         mdx = wx .* (-squeeze(coeff(:, :, 1, k)) .* sin(pt(n) .* wx) .* cos(pt(n + 1) .* wy) ...
                             +squeeze(coeff(:, :, 2, k)) .* cos(pt(n) .* wx) .* cos(pt(n + 1) .* wy) ...
                             -squeeze(coeff(:, :, 3, k)) .* sin(pt(n) .* wx) .* sin(pt(n + 1) .* wy) ...
@@ -92,7 +92,7 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
                             +squeeze(coeff(:, :, 3, k)) .* cos(pt(n) .* wx) .* cos(pt(n + 1) .* wy) ...
                             +squeeze(coeff(:, :, 4, k)) .* sin(pt(n) .* wx) .* cos(pt(n + 1) .* wy));
                         dy = sum(sum(mdy));
-                        pest(:,i) = pt(:,i) + [dx;dy];
+                        pest(:, i) = pt(:, i) + [dx; dy];
                     end
                     costs(k) = task.get_cost(pest');
                 end

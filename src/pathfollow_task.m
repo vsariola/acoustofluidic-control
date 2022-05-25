@@ -113,7 +113,7 @@ function ret = pathfollow_task(varargin)
             % If we are currently targeting last waypoint AND
             % we have reached the last waypoint, then this particle is
             % done.
-            done(j) = progress(j) == size(paths{j},1) && ...
+            done(j) = progress(j) == size(paths{j}, 1) && ...
             dist(paths{j}(progress(j), :), positions(j, :)) < r.waypointtol;
         end
         logging.log('path_progress', progress);
