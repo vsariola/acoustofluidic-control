@@ -6,7 +6,7 @@ function ret = simulated_chip(model, varargin)
     default_draw = false;
 
     parser = inputParser;
-    parser.addRequired('model', @isstruct);
+    parser.addRequired('sim_model', @isstruct);
     parser.addParameter('numparticles', default_numparticles, @isnumeric);
     parser.addParameter('errorprob', default_errorprob);
     parser.addParameter('startpos', default_startpos);
