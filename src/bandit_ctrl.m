@@ -2,7 +2,7 @@ function ret = bandit_ctrl(reward, num_bandits, varargin)
     default_draw = false;
     default_ucb_constant = 1;
     default_epsilon = 0.1;
-    default_bandit_decay = 1;
+    default_bandit_decay = 0.999;
     default_bandit_variant = 'ucb1';
     expected_variants = {'eps-greedy', 'ucb1', 'ism-normal2'};
 
