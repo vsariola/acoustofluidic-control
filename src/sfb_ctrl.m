@@ -11,6 +11,7 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
     default_sparse_file = [];
     default_sparse_save_interval = 100;
     default_sparse_save = false;
+    default_sparse_load = true;
 
     parser = inputParser;
     parser.addRequired('action', @(x)isa(x, 'function_handle'));
@@ -22,6 +23,7 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
     parser.addParameter('sparse_history', default_sparse_history, @isnumeric);
     parser.addParameter('sparse_file', default_sparse_file);
     parser.addParameter('sparse_save', default_sparse_save);
+    parser.addParameter('sparse_load', default_sparse_load);
     parser.addParameter('sparse_save_interval', default_sparse_save_interval);
     parser.addParameter('max_eigens', default_max_eigens, @isnumeric);
     parser.addParameter('chipwidth', default_chipwidth);
@@ -52,7 +54,7 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
     end
 
     ret = @step;
-    if ~isempty(param.sparse_file) && exist(param.sparse_file, 'file')
+    if ~isempty(param.sparse_file) && exist(param.sparse_file, 'file') && param.sparse_load
         logging.message('Loading sparse fourier model from file ''%s''', param.sparse_file);
         D = load(param.sparse_file);
         p_hist = D.p_hist;
