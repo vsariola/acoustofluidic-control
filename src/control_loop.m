@@ -1,5 +1,5 @@
 function control_loop(varargin)
-    default_model = 'lut';
+    default_model = 'flat';
     default_chip = 'real';
     default_controller = 'linprog';
     default_task = 'pathfollow';
@@ -7,7 +7,7 @@ function control_loop(varargin)
     default_draw = false;
     default_close_all = true;
 
-    expected_model = {'lut'};
+    expected_model = {'lut', 'flat'};
     expected_chip = {'real', 'simulated'};
     expected_controller = {'linprog', 'bandit', 'sfb'};
     expected_task = {'pathfollow'};
@@ -40,6 +40,8 @@ function control_loop(varargin)
         switch (parser.Results.model)
             case 'lut'
                 model = lut_model(varargin{:});
+            case 'flat'
+                model = flat_model(varargin{:});
             otherwise % Customer controller supplied by the user
                 error('Unknown model name');
         end

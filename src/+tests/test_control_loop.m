@@ -8,10 +8,11 @@ classdef test_control_loop < matlab.unittest.TestCase
 
     methods (Test)
         function test_linprog(testCase)
-            chip = simulated_chip(lut_model(), 'startpos', [1, 1], 'randomness', 0);
+            model = lut_model()
+            chip = simulated_chip(model, 'startpos', [1, 1], 'randomness', 0);
             control_loop('chip', chip, 'paths', [1, 1; 3, 3], ...
                 'flushinterval', Inf, 'controller', 'linprog', ...
-                'first_detection', []);
+                'first_detection', [], 'model', model);
             fname = logging.get_filename();
             logging.finish();
             delete(fname);
