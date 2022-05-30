@@ -2,7 +2,7 @@ function moore(varargin)
     order = 5;
     width = 7; % mm
     height = 6;
-    margin = 0.5; % mm from the edges
+    margin = 0.9; % mm from the edges
 
     a = 1 + 1i;
     b = 1 - 1i;
