@@ -1,5 +1,5 @@
 function ret = tracker(startpos, varargin)
-    default_matchdist = 1; % mm
+    default_matchdist = 1.5; % mm
 
     parser = inputParser;
     parser.addRequired('startpos', @(x)isnumeric(x) && size(x, 2) == 2);
