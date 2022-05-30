@@ -132,7 +132,7 @@ function [str, cell_str, s] = struct2str(s, disp_str, index_of_fields_to_use, x_
                     str = sprintf(fmt1, str, fnames{f}, ['''' getfield(s, {l}, fnames{f}) '''']);
                     cell_str{k} = sprintf(fmt11, fnames{f}, ['''' getfield(s, {l}, fnames{f}) '''']);
                     k = k + 1;
-                elseif isnumeric(getfield(s, {l}, fnames{f}))
+                elseif isnumeric(getfield(s, {l}, fnames{f})) || islogical(getfield(s, {l}, fnames{f}))
                     if (max(nr, nc) < 9 && min(nr, nc) == 1)
                         if nr == 1 && nc == 1,
                             str = sprintf(fmt1, str, fnames{f}, num2str(getfield(s, {l}, fnames{f})));
