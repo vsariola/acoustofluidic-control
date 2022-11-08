@@ -6,6 +6,7 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
     default_sparse_history = 1e3;
     default_sparse_lambda = 1e-4;
     default_max_eigens = 6;
+    default_min_eigens = 1;
     default_chipwidth = 7;
     default_chipheight = 6;
     default_sparse_file = [];
@@ -25,6 +26,7 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
     parser.addParameter('sparse_save', default_sparse_save);
     parser.addParameter('sparse_load', default_sparse_load);
     parser.addParameter('sparse_save_interval', default_sparse_save_interval);
+    parser.addParameter('min_eigens', default_min_eigens, @isnumeric);
     parser.addParameter('max_eigens', default_max_eigens, @isnumeric);
     parser.addParameter('chipwidth', default_chipwidth);
     parser.addParameter('chipheight', default_chipheight);
@@ -67,7 +69,8 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
         weights = cell(1, num_bandits);
     end
 
-    coeff = zeros(param.max_eigens, param.max_eigens, 4, param.num_bandits);
+    coeffdim = param.max_eigens-param.min_eigens+1;
+    coeff = zeros(coeffdim, coeffdim, 4, param.num_bandits);
 
     stepno = 0;
     function step()
@@ -79,7 +82,7 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
                 a = randi([1, num_bandits], 1);
             else
                 costs = zeros(1, param.num_bandits);
-                [wx, wy] = ndgrid((1:param.max_eigens) * pi / param.chipwidth, (1:param.max_eigens) * pi / param.chipheight);
+                [wx, wy] = ndgrid((param.min_eigens:param.max_eigens) * pi / param.chipwidth, (param.min_eigens:param.max_eigens) * pi / param.chipheight);
                 for k = 1:param.num_bandits
                     pest = zeros(size(pt));
                     for i = 1:size(p, 1)
@@ -119,26 +122,26 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
             end
             b = dp_hist{a};
             pp = p_hist{a};
-            A = zeros(length(b), param.max_eigens * param.max_eigens * 4);
-            [wx, wy] = ndgrid((1:param.max_eigens) * pi / param.chipwidth, (1:param.max_eigens) * pi / param.chipheight);
-            mdx = zeros(param.max_eigens, param.max_eigens, 4);
-            mdy = zeros(param.max_eigens, param.max_eigens, 4);
+            A = zeros(length(b), coeffdim^2 * 4);
+            [wx, wy] = ndgrid((param.min_eigens:param.max_eigens) * pi / param.chipwidth, (param.min_eigens:param.max_eigens) * pi / param.chipheight);
+            mdx = zeros(coeffdim, coeffdim, 4);
+            mdy = zeros(coeffdim, coeffdim, 4);
             for n = 1:2:length(b)
                 mdx(:, :, 1) = -wx .* sin(pp(n) .* wx) .* cos(pp(n + 1) .* wy);
                 mdx(:, :, 2) = wx .* cos(pp(n) .* wx) .* cos(pp(n + 1) .* wy);
                 mdx(:, :, 3) = -wx .* sin(pp(n) .* wx) .* sin(pp(n + 1) .* wy);
                 mdx(:, :, 4) = wx .* cos(pp(n) .* wx) .* sin(pp(n + 1) .* wy);
-                A(n, :) = reshape(mdx, 1, param.max_eigens * param.max_eigens * 4);
+                A(n, :) = reshape(mdx, 1, coeffdim * coeffdim * 4);
                 mdy(:, :, 1) = -wy .* cos(pp(n) .* wx) .* sin(pp(n + 1) .* wy);
                 mdy(:, :, 2) = -wy .* sin(pp(n) .* wx) .* sin(pp(n + 1) .* wy);
                 mdy(:, :, 3) = wy .* cos(pp(n) .* wx) .* cos(pp(n + 1) .* wy);
                 mdy(:, :, 4) = wy .* sin(pp(n) .* wx) .* cos(pp(n + 1) .* wy);
-                A(n + 1, :) = reshape(mdy, 1, param.max_eigens * param.max_eigens * 4);
+                A(n + 1, :) = reshape(mdy, 1, coeffdim * coeffdim  * 4);
             end
             x = lasso(A, b, 'lambda', param.sparse_lambda, 'Weights', weights{a}); % TODO: add weights
-            coeff(:, :, :, a) = reshape(x, param.max_eigens, param.max_eigens, 4, 1);
+            coeff(:, :, :, a) = reshape(x, coeffdim, coeffdim, 4, 1);
             if param.draw_sfb
-                [wx, wy] = ndgrid((1:param.max_eigens) * pi, (1:param.max_eigens) * pi);
+                [wx, wy] = ndgrid((param.min_eigens:param.max_eigens) * pi, (param.min_eigens:param.max_eigens) * pi);
                 p = zeros(size(imx));
                 for i = 1:size(imx, 1)
                     for j = 1:size(imx, 2)
