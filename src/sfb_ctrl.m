@@ -13,6 +13,7 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
     default_sparse_save_interval = 100;
     default_sparse_save = false;
     default_sparse_load = true;
+    default_sfb_learning = true;    
 
     parser = inputParser;
     parser.addRequired('action', @(x)isa(x, 'function_handle'));
@@ -32,6 +33,7 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
     parser.addParameter('chipheight', default_chipheight);
     parser.addParameter('draw', default_draw);
     parser.addParameter('draw_sfb', default_draw_sfb);
+    parser.addParameter('sfb_learning', default_sfb_learning);
     parser.KeepUnmatched = true;
     parse(parser, action, task, num_bandits, varargin{:});
     param = parser.Results;
@@ -109,6 +111,11 @@ function ret = sfb_ctrl(action, task, num_bandits, varargin)
         logging.log('sfb_actions', a);
         p_hist{a} = [p_hist{a}; reshape(pt, [], 1)];
         param.action(a);
+        
+        if ~param.sfb_learning
+           return 
+        end
+        
         dp = task.get_pos() - p;
         logging.log('sfb_deltapos', dp);
         dp_hist{a} = [dp_hist{a}; reshape(dp', [], 1)];
