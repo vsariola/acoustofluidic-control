@@ -5,6 +5,7 @@ function ret = file_logger(varargin)
     default_randstring = true;
     default_flushinterval = 1000;
     default_blocksize = 200;
+    default_video = true;
 
     INDEX_POSTFIX = '__index';
 
@@ -16,6 +17,7 @@ function ret = file_logger(varargin)
     parser.addParameter('flushinterval', default_flushinterval, @isnumeric);
     parser.addParameter('blocksize', default_blocksize, @isnumeric);
     parser.addParameter('verbosity', true);
+    parser.addParameter('video', default_video);
     parser.KeepUnmatched = true;
     parse(parser, varargin{:});
 
@@ -32,6 +34,7 @@ function ret = file_logger(varargin)
         filename = [filename '-' randstring];
     end
 
+    videowriters = struct();
     imgdir = [filename '_images/'];
     filename = [filename '.mat'];
 
@@ -83,9 +86,24 @@ function ret = file_logger(varargin)
                 if ~exist(imgdir, 'dir')
                     mkdir(imgdir);
                 end
-                imgfilename = sprintf('%s-%d.jpg', var, data.(ind));
-                imwrite(value, fullfile(imgdir, imgfilename));
-                value = imgfilename;
+                if parser.Results.video
+                    videofilename = sprintf('%s.avi', var);
+                    if isfield(videowriters,var)
+                        v = videowriters.(var);
+                    else
+                        fullvideopath = fullfile(imgdir, videofilename);
+                        v = VideoWriter(fullvideopath,'Motion JPEG AVI');
+                        v.Quality = 95;
+                        open(v);
+                        videowriters.(var) = v;
+                    end          
+                    writeVideo(v,value);                    
+                    value = sprintf('%s, frame %d',videofilename,data.(ind));
+                else
+                    imgfilename = sprintf('%s-%d.jpg', var, data.(ind));
+                    imwrite(value, fullfile(imgdir, imgfilename));
+                    value = imgfilename;
+                end                
             end
             if length(data.(var)) < data.(ind)
                 data.(var) = [data.(var); cell(data.(ind) + parser.Results.blocksize, 1)];
