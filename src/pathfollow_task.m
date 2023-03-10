@@ -9,6 +9,7 @@ function ret = pathfollow_task(varargin)
     default_chipheight = 6;
     default_first_detection = [];
     default_repulsion = 0;
+    default_costpower = 1;
 
     parser = inputParser;
     parser.addParameter('first_detection', default_first_detection, ...
@@ -24,6 +25,7 @@ function ret = pathfollow_task(varargin)
     parser.addParameter('chipheight', default_chipheight);
     parser.addParameter('draw', default_draw);
     parser.addParameter('repulsion', default_repulsion);
+    parser.addParameter('costpower', default_costpower);
     parser.KeepUnmatched = true;
     parse(parser, varargin{:});
     r = parser.Results;
@@ -128,7 +130,7 @@ function ret = pathfollow_task(varargin)
     function ret = get_cost(positions)
         ret = 0;
         for j = 1:length(paths)
-            ret = ret + dist(paths{j}(progress(j), :), positions(j, :));
+            ret = ret + dist(paths{j}(progress(j), :), positions(j, :)) ^ r.costpower;
             for k = (j + 1):length(paths)
                 d = dist(positions(j, :), positions(k, :));
                 if d < r.repulsion
